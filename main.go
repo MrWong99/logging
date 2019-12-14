@@ -1,48 +1,39 @@
 package main
 
 import (
+	loader "github.com/MrWong99/logging/files"
 	"flag"
 	"log"
-	fsnotify "github.com/fsnotify/fsnotify"
+	"strings"
 )
 
 func main() {
 	var logFolder string
 
-	flag.StringVar(&logFolder, "log-folder", "./logs", "specify folder to read logs from. Default is ./logs")
+	flag.StringVar(&logFolder, "log-folders", "./logs,./log", "specify folders to read logs from. Default is ./logs,./log")
 	flag.Parse()
 
-	log.Printf("Reading logs from folder %s", logFolder)
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
+	folders := strings.Split(logFolder, ",")
+	log.Printf("Reading logs from folders %s", folders)
+
+	for _, folder := range folders {
+		loader := loader.NewFolderLoader(folder)
+		logChan := make(chan string)
+		loader.AddNewLineChan(logChan)
+		go func() {
+			for {
+				logText, more := <-logChan
+				if more {
+					log.Printf("Logged Text:\n%s\n", logText)
+				} else {
+					log.Println("I guess I was closed...")
+					return
+				}
+			}
+		}()
+		loader.StartWatching()
 	}
-	defer watcher.Close()
 
 	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	err = watcher.Add(logFolder)
-	if err != nil {
-		log.Fatal(err)
-	}
 	<-done
 }
