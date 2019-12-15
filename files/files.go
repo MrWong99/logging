@@ -9,6 +9,15 @@ import (
 	fsnotify "github.com/fsnotify/fsnotify"
 )
 
+// The FolderLoader can be used to keep watching for changes in a folder.
+// It allows reading logs as they come in, by line or just the entire files.
+type FolderLoader struct {
+	LogFolder     string
+	fileBytesRead map[string]int64
+	newLines      []chan string
+	close         chan bool
+}
+
 // Helper function to add to a channel
 func extendChannelSlice(toExend []chan string, element chan string) []chan string {
 	n := len(toExend)
@@ -28,9 +37,13 @@ func (loader *FolderLoader) getLastText(filePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	info, err := file.Stat()
+	if err != nil {
+		return "", err
+	}
 	// Check what we need to read from the file
 	readBytes := loader.fileBytesRead[filePath]
-	info, _ := file.Stat()
+	log.Printf("file size: %d\nread bytes: %d", info.Size(), readBytes)
 	bytesToRead := info.Size() - readBytes
 	// If the file became smaller it probably was deleted before
 	if bytesToRead > 0 {
@@ -51,15 +64,6 @@ func (loader *FolderLoader) getLastText(filePath string) (string, error) {
 	return string(byteContent), nil
 }
 
-// The FolderLoader can be used to keep watching for changes in a folder.
-// It allows reading logs as they come in, by line or just the entire files.
-type FolderLoader struct {
-	LogFolder     string
-	fileBytesRead map[string]int64
-	newLines      []chan string
-	close         chan bool
-}
-
 // StartWatching for logs an notify new line channels added with AddNewLineChan when
 // any file changes.
 func (loader *FolderLoader) StartWatching() error {
@@ -77,13 +81,14 @@ func (loader *FolderLoader) StartWatching() error {
 				}
 				log.Println("event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					filePath := loader.LogFolder + event.Name
+					filePath := event.Name
 					log.Println("modified file:", filePath)
 					text, err := loader.getLastText(filePath)
 					if err != nil {
-						log.Fatal(err)
+						log.Printf("Error while reading logs: %s", err)
 					}
 					for _, newLineChan := range loader.newLines {
+						log.Println("Sending to channel '" + text + "'")
 						newLineChan <- text
 					}
 				}
@@ -114,6 +119,7 @@ func NewFolderLoader(logLocation string) *FolderLoader {
 	// Initialize slice and channel
 	loader.newLines = make([]chan string, 10)
 	loader.close = make(chan bool)
+	loader.fileBytesRead = make(map[string]int64)
 	return loader
 }
 

@@ -1,3 +1,5 @@
+github.com/MrWong99/logging/files v0.0.0-20191214230738-a0aae9372ab8 h1:LKf0TaNaezUfUQ6U4HD0kRg/VgGNcd5ePNa3EH2ftv4=
+github.com/MrWong99/logging/files v0.0.0-20191214230738-a0aae9372ab8/go.mod h1:UKWikNHmNSbTNAK/bomIYOra0dKVsMuPr2rwDdkc/M4=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 golang.org/x/sys v0.0.0-20191210023423-ac6580df4449 h1:gSbV7h1NRL2G1xTg/owz62CST1oJBmxy4QpMMregXVQ=
