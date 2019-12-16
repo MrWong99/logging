@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"path/filepath"
 	"strings"
 
 	loader "github.com/MrWong99/logging/files"
@@ -11,20 +10,23 @@ import (
 
 type changeReader struct {
 	logChannel chan string
+	loader     *loader.FolderLoader
 }
 
 func (reader *changeReader) listenForChange() {
-	go func() {
-		for {
-			logText, more := <-reader.logChannel
-			if more {
-				log.Printf("Logged Text:\n%s\n", logText)
-			} else {
-				log.Println("I guess I was closed...")
-				return
+	for {
+		logText, more := <-reader.logChannel
+		if more {
+			log.Printf("Logged Text:\n%s\n", logText)
+			if strings.Contains(logText, "Close()") {
+				log.Println("Text contained 'Close()' so im closing")
+				reader.loader.Close()
 			}
+		} else {
+			log.Println("I guess I was closed...")
+			return
 		}
-	}()
+	}
 }
 
 func main() {
@@ -36,19 +38,11 @@ func main() {
 	folders := strings.Split(logFolder, ",")
 	log.Printf("Reading logs from folders %s", folders)
 
-	for _, folder := range folders {
-		path, err := filepath.Abs(folder)
-		if err != nil {
-			log.Printf("Could not parse path '%s': %s", folder, err)
-		}
-		loader := loader.NewFolderLoader(path)
-		logChan := make(chan string)
-		reader := changeReader{logChannel: logChan}
-		reader.listenForChange()
-		loader.AddNewLineChan(*logChan)
-		loader.StartWatching()
+	loader := loader.NewFolderLoader(folders)
+	logChan, err := loader.StartWatching()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	done := make(chan bool)
-	<-done
+	reader := changeReader{logChannel: logChan, loader: loader}
+	reader.listenForChange()
 }
