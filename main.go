@@ -17,11 +17,7 @@ func (reader *changeReader) listenForChange() {
 	for {
 		logText, more := <-reader.logChannel
 		if more {
-			log.Printf("Logged Text:\n%s\n", logText)
-			if strings.Contains(logText, "Close()") {
-				log.Println("Text contained 'Close()' so im closing")
-				reader.loader.Close()
-			}
+			log.Printf("Logged Text:%s\n", logText)
 		} else {
 			log.Println("I guess I was closed...")
 			return
@@ -43,6 +39,7 @@ func main() {
 	log.Printf("Sending logs to backends %s", backends)
 
 	loader := loader.NewFolderLoader(folders)
+	defer loader.Close()
 	logChan, err := loader.StartWatching()
 	if err != nil {
 		log.Fatal(err)
