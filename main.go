@@ -1,10 +1,9 @@
 package main
 
 import (
-	"flag"
 	"log"
-	"strings"
 
+	config "github.com/MrWong99/logging/config"
 	loader "github.com/MrWong99/logging/files"
 )
 
@@ -26,19 +25,11 @@ func (reader *changeReader) listenForChange() {
 }
 
 func main() {
-	var logFolder string
-	var grpcAddresses string
-
-	flag.StringVar(&logFolder, "log-folders", "./logs,./log", "specify folders to read logs from. Default is ./logs,./log")
-	flag.StringVar(&grpcAddresses, "grpc-addresses", "127.0.0.1:8080", "specify the backend to send logs to. Default is 127.0.0.1:8080")
-	flag.Parse()
-
-	folders := strings.Split(logFolder, ",")
-	backends := strings.Split(grpcAddresses, ",")
-	log.Printf("Reading logs from folders %s", folders)
-	log.Printf("Sending logs to backends %s", backends)
-
-	loader := loader.NewFolderLoader(folders)
+	err := config.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+	loader := loader.NewFolderLoader(config.Get().LogFolders)
 	defer loader.Close()
 	logChan, err := loader.StartWatching()
 	if err != nil {

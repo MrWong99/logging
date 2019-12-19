@@ -15,13 +15,11 @@ import (
 // It allows reading logs as they come in, by line or just the entire files.
 type FolderLoader struct {
 	LogFolders    []string
-	fileBytesRead map[string]int64      // Map of bytes read for a file
-	fileLocks     map[string]sync.Mutex // Map of file mutexes
-	close         chan chan<- error     // Channel that will receive close call
-	outputChannel chan string           // Logs are written to this channel
-	isClosed      bool                  // Set to true when Close() is first called
-	mu            sync.Mutex            // Map access
-	once          sync.Once             // Read once
+	fileBytesRead map[string]int64  // Map of bytes read for a file
+	close         chan chan<- error // Channel that will receive close call
+	outputChannel chan string       // Logs are written to this channel
+	isClosed      bool              // Set to true when Close() is first called
+	mu            sync.Mutex        // Map access
 }
 
 // FileError is an error related to a file, it will be appended to the message.
@@ -37,7 +35,6 @@ func NewFolderLoader(logLocations []string) *FolderLoader {
 		LogFolders:    logLocations,
 		close:         make(chan chan<- error, 1),
 		fileBytesRead: make(map[string]int64),
-		once:          sync.Once{},
 	}
 	separator := string(os.PathSeparator)
 	for index, location := range loader.LogFolders {
