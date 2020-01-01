@@ -24,8 +24,13 @@ type FolderLoader struct {
 
 // FileError is an error related to a file, it will be appended to the message.
 type FileError struct {
-	err      error
+	error
 	filePath string
+}
+
+// Error returns the error that occured starting with the file that failed.
+func (err FileError) Error() string {
+	return "Path: " + err.filePath + "\n" + err.Error()
 }
 
 // NewFolderLoader creates a new FolderLoader.
@@ -62,21 +67,16 @@ func (loader *FolderLoader) Close() error {
 	return <-ch
 }
 
-// Error returns the error that occured starting with the file that failed.
-func (err FileError) Error() string {
-	return "Path: " + err.filePath + "\n" + err.err.Error()
-}
-
 // readLastText writes the last read text for a file to the output channel.
 func (loader *FolderLoader) readLastText(filePath string) {
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
-		log.Fatal(FileError{err: err, filePath: filePath})
+		log.Fatal(FileError{err, filePath})
 	}
 	info, err := file.Stat()
 	if err != nil {
-		log.Fatal(FileError{err: err, filePath: filePath})
+		log.Fatal(FileError{err, filePath})
 	}
 	// Check what we need to read from the file
 	loader.mu.Lock()
@@ -94,12 +94,12 @@ func (loader *FolderLoader) readLastText(filePath string) {
 	// Read from last location
 	_, err = file.Seek(readBytes, 0)
 	if err != nil {
-		log.Fatal(FileError{err: err, filePath: filePath})
+		log.Fatal(FileError{err, filePath})
 	}
 	byteContent := make([]byte, bytesToRead)
 	_, err = io.ReadAtLeast(file, byteContent, int(bytesToRead))
 	if err != nil {
-		log.Fatal(FileError{err: err, filePath: filePath})
+		log.Fatal(FileError{err, filePath})
 	}
 	text := string(byteContent)
 	if len(text) > 0 {
@@ -141,7 +141,7 @@ func (loader *FolderLoader) StartWatching() (chan string, error) {
 	for _, folder := range loader.LogFolders {
 		err := watcher.Add(folder)
 		if err != nil {
-			return nil, FileError{err: err, filePath: folder}
+			return nil, FileError{err, folder}
 		}
 	}
 	return outputChannel, nil

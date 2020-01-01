@@ -1,0 +1,21 @@
+syntax = "proto3";
+package communication;
+
+import "google/protobuf/timestamp.proto";
+
+enum LogType {
+    SYSLOG = 0;
+    APPLOG = 1;
+}
+
+message LogText {
+    google.protobuf.Timestamp logged_at = 1;
+    string log_message = 2;
+    LogType type = 3;
+}
+
+message LogFile {
+    string path = 1;
+    string content = 2;
+    LogType type = 3;
+}
