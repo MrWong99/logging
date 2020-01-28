@@ -14,3 +14,25 @@ The executable has two parameters:
 
 The log files need to be appended to via software or in the editor.
 **Most modern IDEs and editors will perform [two write operations on save](https://github.com/fsnotify/fsnotify/issues/304), which results in the entire file being logged once only one line changes!**
+
+## Generate from Protobuf file
+
+To generate the gRPC code you need to [download and install the Google Protocol Buffer Compiler](https://developers.google.com/protocol-buffers/docs/downloads).
+
+Afterwars you have to install the following go packages:
+```bash
+go get -u google.golang.org/grpc
+go get -u github.com/golang/protobuf/protoc-gen-go
+```
+
+Finally you can regenerate the [communication/log.pb.go] file using
+
+**Linux:**
+```bash
+protoc -I communication/ communication/log.proto --go_out=plugins=grpc:communication
+```
+
+**Windows:**
+```batch
+protoc -I .\communication\ .\communication\log.proto --go_out=plugins=grpc:communication
+```
