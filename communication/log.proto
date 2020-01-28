@@ -18,6 +18,7 @@ service LogReceiver {
 message LogText {
     google.protobuf.Timestamp logged_at = 1;
     string log_message = 2;
+    LogPath log_file = 3;
 }
 
 message LogFile {
