@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -12,25 +13,37 @@ var globalConfig ApplicationConfig
 type ApplicationConfig struct {
 	LogFolders   []string // Folders that should be watched for changes.
 	GrpcBackends []string // gRPC backends to send data to.
+	GrpcPort     int      // Port for the gRPC server
 }
 
 // Init the configuration from the cli parameters.
 func Init() error {
 	var logFolder string
 	var grpcAddresses string
+	var grpcPort string
 
 	flag.StringVar(&logFolder, "log-folders", "./logs,./log", "specify folders to read logs from. Default is ./logs,./log")
-	flag.StringVar(&grpcAddresses, "grpc-addresses", "127.0.0.1:8080", "specify the backend to send logs to. Default is 127.0.0.1:8080")
+	flag.StringVar(&grpcAddresses, "grpc-addresses", "", "specify the backends to send logs to. Default is none")
+	flag.StringVar(&grpcPort, "grpc-port", "-1", "specify the port of the gRPC server to start. If none is set no server will be started. Default is none")
 	flag.Parse()
 
 	folders := strings.Split(logFolder, ",")
 	backends := strings.Split(grpcAddresses, ",")
+	port, err := strconv.Atoi(grpcPort)
+	if err != nil {
+		log.Printf("Could not read port argument '%s' error: %s", grpcPort, err)
+		port = -1
+	}
 	globalConfig = ApplicationConfig{
 		LogFolders:   folders,
 		GrpcBackends: backends,
+		GrpcPort:     port,
 	}
 	log.Printf("Reading logs from folders %s", folders)
 	log.Printf("Sending logs to backends %s", backends)
+	if port > 0 {
+		log.Printf("Starting gRPC server on port %s", strconv.Itoa(port))
+	}
 	return nil
 }
 

@@ -9,11 +9,36 @@ new logs written in any given folder and then forward these logs via a gRPC conn
 
 The executable has two parameters:
 
-* `--log-folders`: specify folders to read logs from. Default is ./logs,./log
-* `--grpc-addresses`: specify the backend to send logs to. Default is 127.0.0.1:8080
+* `--log-folders`: specify folders to read logs from. **The folders need to exist!** Default is ./logs,./log
+* `--grpc-addresses`: specify the backends to send logs to. Seperate multiple servers with `,` e.g. `localhost:8080,example.web.com:234`. Default is none
+* `--grpc-port`: specify the port of the gRPC server to start. If none is set no server will be started. Default is none
 
 The log files need to be appended to via software or in the editor.
-**Most modern IDEs and editors will perform [two write operations on save](https://github.com/fsnotify/fsnotify/issues/304), which results in the entire file being logged once only one line changes!**
+**Most modern IDEs and editors will perform [two write operations on save](https://github.com/fsnotify/fsnotify/issues/304), which results in the entire file being logged even if only one line changes!**
+
+To start the application as server for a specific port:
+
+**Windows:**
+```batch
+logging.exe --log-folders . --grpc-port 8080
+```
+
+**Linux:**
+```bash
+./logging --log-folders . --grpc-port 8080
+```
+
+you can then connect a client that sends logs in folder `./logs` to the server:
+
+**Windows:**
+```batch
+logging.exe --log-folders ./logs --grpc-addresses 127.0.0.1:8080
+```
+
+**Linux:**
+```batch
+./logging --log-folders ./logs --grpc-addresses 127.0.0.1:8080
+```
 
 ## Generate from Protobuf file
 

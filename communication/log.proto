@@ -6,30 +6,36 @@ option go_package = "communication";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
+// A server implementing this service should allow reading of files
 service LogCollector {
-    rpc GetFileList (LogPath) returns (FileList) {}
-    rpc ReadLogFile (LogPath) returns (LogFile) {}
+    rpc GetFileList (LogPath) returns (FileList) {} // Return a list of existing files for a given directory
+    rpc ReadLogFile (LogPath) returns (LogFile) {} // Read the given file and return its contents
 }
 
+// A server implementing this service should be able to receive logged texts
 service LogReceiver {
     rpc ReceiveLoggedText (LogText) returns (google.protobuf.Any) {}
 }
 
+// One log written to a specific file at a specific time
 message LogText {
     google.protobuf.Timestamp logged_at = 1;
     string log_message = 2;
     LogPath log_file = 3;
 }
 
+// A file containing logs
 message LogFile {
     LogPath path = 1;
     string content = 2;
 }
 
+// A list of files
 message FileList {
     repeated LogPath paths = 1;
 }
 
+// Path to a log file or directory containing logs
 message LogPath {
     string path = 1;
 }

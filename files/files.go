@@ -1,15 +1,25 @@
 package files
 
 import (
+	"errors"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	fsnotify "github.com/fsnotify/fsnotify"
 )
+
+// A LogMessage is created when something is logged.
+type LogMessage struct {
+	FilePath  string    // The file in which the message was logged.
+	Timestamp time.Time // The time when it was logged.
+	Text      string    // The text that was logged.
+}
 
 // The FolderLoader can be used to keep watching for changes in a folder.
 // It allows reading logs as they come in, by line or just the entire files.
@@ -17,7 +27,7 @@ type FolderLoader struct {
 	LogFolders    []string
 	fileBytesRead map[string]int64  // Map of bytes read for a file
 	close         chan chan<- error // Channel that will receive close call
-	outputChannel chan string       // Logs are written to this channel
+	outputChannel chan LogMessage   // Logs are written to this channel
 	isClosed      bool              // Set to true when Close() is first called
 	mu            sync.Mutex        // Map access
 }
@@ -54,6 +64,28 @@ func NewFolderLoader(logLocations []string) *FolderLoader {
 		}
 	}
 	return loader
+}
+
+// ReadFile reads the given log file if it exists and is in the scope of this reader.
+func (loader *FolderLoader) ReadFile(filePath string) (string, error) {
+	path, err := filepath.Abs(filePath)
+	if err != nil {
+		return "", FileError{err, filePath}
+	}
+	contained := false
+	for _, location := range loader.LogFolders {
+		if strings.HasPrefix(path, location) {
+			contained = true
+		}
+	}
+	if !contained {
+		return "", FileError{errors.New("File is not within scope of current folders"), filePath}
+	}
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", FileError{err, filePath}
+	}
+	return string(content), nil
 }
 
 // Close stops and closes this loader. It also notifies all channels to be closed.
@@ -103,18 +135,22 @@ func (loader *FolderLoader) readLastText(filePath string) {
 	}
 	text := string(byteContent)
 	if len(text) > 0 {
-		loader.outputChannel <- text
+		loader.outputChannel <- LogMessage{
+			FilePath:  filePath,
+			Timestamp: time.Now(),
+			Text:      text,
+		}
 	}
 }
 
 // StartWatching for logs and return a channel with the log output.
-func (loader *FolderLoader) StartWatching() (chan string, error) {
+func (loader *FolderLoader) StartWatching() (chan LogMessage, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		watcher.Close()
 		return nil, err
 	}
-	outputChannel := make(chan string, 50)
+	outputChannel := make(chan LogMessage, 50)
 	loader.outputChannel = outputChannel
 	go func() {
 		for {
