@@ -1,21 +1,34 @@
 syntax = "proto3";
 package communication;
 
-import "google/protobuf/timestamp.proto";
+option go_package = "communication";
 
-enum LogType {
-    SYSLOG = 0;
-    APPLOG = 1;
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+service LogCollector {
+    rpc GetFileList (LogPath) returns (FileList) {}
+    rpc ReadLogFile (LogPath) returns (LogFile) {}
+}
+
+service LogReceiver {
+    rpc ReceiveLoggedText (LogText) returns (google.protobuf.Any) {}
 }
 
 message LogText {
     google.protobuf.Timestamp logged_at = 1;
     string log_message = 2;
-    LogType type = 3;
 }
 
 message LogFile {
-    string path = 1;
+    LogPath path = 1;
     string content = 2;
-    LogType type = 3;
+}
+
+message FileList {
+    repeated LogPath paths = 1;
+}
+
+message LogPath {
+    string path = 1;
 }
