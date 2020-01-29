@@ -122,6 +122,7 @@ func (server LogTextReceiver) ReceiveLoggedText(ctx context.Context, text *commu
 }
 
 func main() {
+	log.Println("Starting applcation...")
 	err := config.Init()
 	if err != nil {
 		log.Fatal(err)

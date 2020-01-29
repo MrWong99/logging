@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -33,6 +34,23 @@ func Init() error {
 	if err != nil {
 		log.Printf("Could not read port argument '%s' error: %s", grpcPort, err)
 		port = -1
+	}
+	foldersEnv := os.Getenv("LOG_FOLDERS")
+	backendsEnv := os.Getenv("GRPC_ADDRESSES")
+	portEnv := os.Getenv("GRPC_PORT")
+	if foldersEnv != "" {
+		folders = strings.Split(foldersEnv, ",")
+	}
+	if backendsEnv != "" {
+		backends = strings.Split(backendsEnv, ",")
+	}
+	if portEnv != "" {
+		port2, err := strconv.Atoi(portEnv)
+		if err != nil {
+			log.Printf("Could not read port argument '%s' error: %s", portEnv, err)
+		} else {
+			port = port2
+		}
 	}
 	globalConfig = ApplicationConfig{
 		LogFolders:   folders,

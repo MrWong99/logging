@@ -7,11 +7,19 @@ new logs written in any given folder and then forward these logs via a gRPC conn
 
 ## Usage
 
-The executable has two parameters:
+The executable has three **parameters**:
 
 * `--log-folders`: specify folders to read logs from. **The folders need to exist!** Default is ./logs,./log
 * `--grpc-addresses`: specify the backends to send logs to. Seperate multiple servers with `,` e.g. `localhost:8080,example.web.com:234`. Default is none
 * `--grpc-port`: specify the port of the gRPC server to start. If none is set no server will be started. Default is none
+
+You can also provide the same configuration via **environment variables**:
+
+* `LOG_FOLDERS`
+* `GRPC_ADDRESSES`
+* `GRPC_PORT`
+
+The environment variables override the cli parameters.
 
 The log files need to be appended to via software or in the editor.
 **Most modern IDEs and editors will perform [two write operations on save](https://github.com/fsnotify/fsnotify/issues/304), which results in the entire file being logged even if only one line changes!**
