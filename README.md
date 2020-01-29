@@ -1,4 +1,4 @@
-:exclamation: **THIS IS IN DEVELOPMENT AND NOT EVEN REMOTELY FINISHED!** :exclamation:
+![Go](https://github.com/MrWong99/logging/workflows/Go/badge.svg) ![Release](https://github.com/MrWong99/logging/workflows/Release/badge.svg)
 
 # gLogCollector
 
