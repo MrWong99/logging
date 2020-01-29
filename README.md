@@ -1,4 +1,4 @@
-![Go](https://github.com/MrWong99/logging/workflows/Go/badge.svg) ![Release](https://github.com/MrWong99/logging/workflows/Release/badge.svg)
+![Go](https://github.com/MrWong99/logging/workflows/Go/badge.svg) ![Release](https://github.com/MrWong99/logging/workflows/Release/badge.svg) ![Docker](https://github.com/MrWong99/logging/workflows/Docker/badge.svg)
 
 # gLogCollector
 
@@ -47,6 +47,12 @@ logging.exe --log-folders ./logs --grpc-addresses 127.0.0.1:8080
 ```batch
 ./logging --log-folders ./logs --grpc-addresses 127.0.0.1:8080
 ```
+
+## Docker
+
+You can also pull the image from Dockerhub:
+
+https://hub.docker.com/repository/docker/mrwong99/logging
 
 ## Generate from Protobuf file
 
