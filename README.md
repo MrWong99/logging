@@ -1,4 +1,4 @@
-![Go](https://github.com/MrWong99/logging/workflows/Go/badge.svg) ![Release](https://github.com/MrWong99/logging/workflows/Release/badge.svg) ![Docker](https://github.com/MrWong99/logging/workflows/Docker/badge.svg)
+![Go](https://github.com/MrWong99/logging/workflows/Go/badge.svg) [![Release](https://github.com/MrWong99/logging/workflows/Release/badge.svg)](https://github.com/MrWong99/logging/releases) [![Docker](https://github.com/MrWong99/logging/workflows/Docker/badge.svg)](https://hub.docker.com/repository/docker/mrwong99/logging)
 
 # gLogCollector
 

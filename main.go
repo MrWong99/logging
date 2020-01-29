@@ -117,7 +117,10 @@ type LogTextReceiver struct {
 
 // ReceiveLoggedText receives a logs message via gRPC and displays it in STDOUT.
 func (server LogTextReceiver) ReceiveLoggedText(ctx context.Context, text *communication.LogText) (*any.Any, error) {
-	fmt.Printf("Received log in file %s timestamp %s with content: %s\n", text.GetLogFile().GetPath(), text.GetLoggedAt(), text.GetLogMessage())
+	fmt.Printf("Received log in file %s at %s with content:\n%s\n",
+		text.GetLogFile().GetPath(),
+		time.Unix(text.GetLoggedAt().GetSeconds(), int64(text.GetLoggedAt().GetNanos())),
+		text.GetLogMessage())
 	return &any.Any{}, nil
 }
 
