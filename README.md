@@ -2,7 +2,7 @@
 
 # gLogCollector
 
-This is a simple tool to collect and forward logs. When finished it should be able to efficiently read
+This is a simple tool to collect and forward logs. It is able to efficiently read
 new logs written in any given folder and then forward these logs via a gRPC connection.
 
 ## Usage
