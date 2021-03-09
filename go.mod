@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	golang.org/x/net v0.0.0-20200930145003-4acb6c075d10 // indirect
 	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect
 	golang.org/x/text v0.3.3 // indirect
